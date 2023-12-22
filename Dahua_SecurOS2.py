@@ -64,29 +64,29 @@ def connect(deviceIp):
             pattern9 = '^((?!Code=SceneChange;action=Stop;index=.*).)*$'
             if r.status_code == 200:
                 logger.info(f'{now.strftime("%d")}/{now.strftime("%m")}/{now.strftime("%Y")} {now.strftime("%H")}:{now.strftime("%M")}:{now.strftime("%S")}-Connected successfully to: {deviceIp}')
-            for line in r.iter_lines(decode_unicode=True, chunk_size=10):
-                    if re.findall(pattern, line, flags=re.MULTILINE):
-                        if re.findall(pattern2, line, flags=re.MULTILINE):
-                            if re.findall(pattern3, line, flags=re.MULTILINE):
-                                if re.findall(pattern4, line, flags=re.MULTILINE):
-                                    if re.findall(pattern5, line, flags=re.MULTILINE):
-                                        if re.findall(pattern6, line, flags=re.MULTILINE):
-                                            if re.findall(pattern7, line, flags=re.MULTILINE):
-                                                if re.findall(pattern8, line, flags=re.MULTILINE):
-                                                    if re.findall(pattern9, line, flags=re.MULTILINE):
-                                                            logger.info(line)
-                                                            line1 = line.replace("=", '":"')
-                                                            line2 = line1.replace(";", '","')
-                                                            line3 = '{"' + line2 + '"}'
-                                                            event = ast.literal_eval(line3)
-                                                            now = datetime.datetime.now()   
-                                                            finalCode = event['Code']
-                                                            channel = int(event['index'])
-                                                            securosId = devices['devices'][deviceIndex]['objId'][channel]
-                                                            #Writing to Spectator
-                                                            securosSession = requests.Session()
-                                                            s = securosSession.get(f'http://{settings["httpEventGateIp"]}:{settings["httpEventGatePort"]}/event?name={devices["devices"][deviceIndex]["name"]}&securosId={securosId}&code={event["Code"]}')
-                                                            logger.info(f'{now.strftime("%d")}/{now.strftime("%m")}/{now.strftime("%Y")} {now.strftime("%H")}:{now.strftime("%M")}:{now.strftime("%S")}-Event:{event["Code"]} Name:{devices["devices"][deviceIndex]["name"]}')
+                    for line in r.iter_lines(decode_unicode=True, chunk_size=10):
+                        if all(re.findall(pattern, line, flags=re.MULTILINE),
+                           re.findall(pattern2, line, flags=re.MULTILINE),
+                           re.findall(pattern3, line, flags=re.MULTILINE),
+                           re.findall(pattern4, line, flags=re.MULTILINE),
+                           re.findall(pattern5, line, flags=re.MULTILINE),
+                           re.findall(pattern6, line, flags=re.MULTILINE),
+                           re.findall(pattern7, line, flags=re.MULTILINE),
+                           re.findall(pattern8, line, flags=re.MULTILINE),
+                           re.findall(pattern9, line, flags=re.MULTILINE)):
+                            logger.info(line)
+                            line1 = line.replace("=", '":"')
+                            line2 = line1.replace(";", '","')
+                            line3 = '{"' + line2 + '"}'
+                            event = ast.literal_eval(line3)
+                            now = datetime.datetime.now()   
+                            finalCode = event['Code']
+                            channel = int(event['index'])
+                            securosId = devices['devices'][deviceIndex]['objId'][channel]
+                            #Writing to Spectator
+                            securosSession = requests.Session()
+                            s = securosSession.get(f'http://{settings["httpEventGateIp"]}:{settings["httpEventGatePort"]}/event?name={devices["devices"][deviceIndex]["name"]}&securosId={securosId}&code={event["Code"]}')
+                            logger.info(f'{now.strftime("%d")}/{now.strftime("%m")}/{now.strftime("%Y")} {now.strftime("%H")}:{now.strftime("%M")}:{now.strftime("%S")}-Event:{event["Code"]} Name:{devices["devices"][deviceIndex]["name"]}')
         except Exception as err:
             now = datetime.datetime.now()
             logger.info(err)
